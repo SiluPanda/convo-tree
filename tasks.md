@@ -6,11 +6,11 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ## Phase 0: Project Scaffolding and Dev Dependencies
 
-- [ ] **Install dev dependencies** — Install `typescript`, `vitest`, `eslint`, and `@types/node` as devDependencies. Verify `npm run build`, `npm run test`, and `npm run lint` scripts work (even if they produce no output yet). | Status: not_done
+- [x] **Install dev dependencies** — Install `typescript`, `vitest`, `eslint`, and `@types/node` as devDependencies. Verify `npm run build`, `npm run test`, and `npm run lint` scripts work (even if they produce no output yet). | Status: done
 - [ ] **Create test directory structure** — Create the full test directory hierarchy as specified: `src/__tests__/core/`, `src/__tests__/branching/`, `src/__tests__/navigation/`, `src/__tests__/tree-ops/`, `src/__tests__/serialization/`, `src/__tests__/events/`, `src/__tests__/fixtures/`. | Status: not_done
 - [ ] **Create source file stubs** — Create empty source files matching the specified file structure: `src/types.ts`, `src/errors.ts`, `src/node.ts`, `src/tree.ts`, `src/navigation.ts`, `src/branch.ts`, `src/serialization.ts`, `src/events.ts`, `src/visualization.ts`. Ensure `src/index.ts` re-exports the public API surface. | Status: not_done
 - [ ] **Create test fixtures** — Create `src/__tests__/fixtures/trees.ts` (pre-built tree structures for tests), `src/__tests__/fixtures/mock-time.ts` (deterministic time source returning incrementing timestamps), and `src/__tests__/fixtures/mock-id.ts` (deterministic ID generator returning sequential IDs like `node-1`, `node-2`, etc.). | Status: not_done
-- [ ] **Configure vitest** — Add a `vitest.config.ts` (or equivalent configuration) if needed beyond the default `vitest run` setup. Ensure tests can import from `src/` without issues. | Status: not_done
+- [x] **Configure vitest** — Add a `vitest.config.ts` (or equivalent configuration) if needed beyond the default `vitest run` setup. Ensure tests can import from `src/` without issues. | Status: done
 
 ---
 
@@ -18,49 +18,49 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ### 1.1 Type Definitions (`src/types.ts`)
 
-- [ ] **Define ConversationNode interface** — Define the `ConversationNode` interface with fields: `id` (string), `role` (`'system' | 'user' | 'assistant' | 'tool'`), `content` (`string | ContentPart[]`), `parentId` (`string | null`), `children` (`string[]`), `createdAt` (number), `metadata` (`Record<string, unknown>`), `branchLabel` (optional string). | Status: not_done
+- [x] **Define ConversationNode interface** — Define the `ConversationNode` interface with fields: `id` (string), `role` (`'system' | 'user' | 'assistant' | 'tool'`), `content` (`string | ContentPart[]`), `parentId` (`string | null`), `children` (`string[]`), `createdAt` (number), `metadata` (`Record<string, unknown>`), `branchLabel` (optional string). | Status: done
 - [ ] **Define ContentPart types** — Define `TextPart` (with `type: 'text'` and `text: string`), `ImagePart` (with `type: 'image_url'` and `image_url: { url: string; detail?: 'auto' | 'low' | 'high' }`), and the union type `ContentPart = TextPart | ImagePart`. | Status: not_done
-- [ ] **Define Message interface** — Define the `Message` interface for LLM API output: `role`, `content`, optional `tool_calls` (`ToolCall[]`), optional `tool_call_id` (string), optional `name` (string). | Status: not_done
+- [x] **Define Message interface** — Define the `Message` interface for LLM API output: `role`, `content`, optional `tool_calls` (`ToolCall[]`), optional `tool_call_id` (string), optional `name` (string). | Status: done
 - [ ] **Define ToolCall interface** — Define `ToolCall` with `id` (string), `type` (`'function'`), and `function` (`{ name: string; arguments: string }`). | Status: not_done
-- [ ] **Define Branch interface** — Define `Branch` with `forkPointId` (string) and optional `label` (string). | Status: not_done
+- [x] **Define Branch interface** — Define `Branch` with `forkPointId` (string) and optional `label` (string). | Status: done
 - [ ] **Define Path interface** — Define `Path` with `leafId` (string), optional `label` (string), `messages` (`Message[]`), `depth` (number), and `isActive` (boolean). | Status: not_done
 - [ ] **Define Comparison interface** — Define `Comparison` with `forkPoint` (`ConversationNode`), `commonPrefix` (`Message[]`), `pathA` (`Message[]`), `pathB` (`Message[]`), `commonLength` (number), `uniqueToA` (number), `uniqueToB` (number). | Status: not_done
 - [ ] **Define TreeView and TreeNode interfaces** — Define `TreeView` with `root` (`TreeNode`), `nodeCount`, `pathCount`, `maxDepth`, `forkPoints` (`string[]`), `headId` (string). Define `TreeNode` with `node` (`ConversationNode`), `isActive` (boolean), `isHead` (boolean), `depth` (number), `children` (`TreeNode[]`), `descendantCount` (number). | Status: not_done
 - [ ] **Define TreeState interface** — Define `TreeState` for serialization with `nodes` (`Record<string, ConversationNode>`), `rootId` (`string | null`), `headId` (`string | null`), `redoStack` (`string[]`), optional `pendingLabel` (string), `treeMeta` (`Record<string, unknown>`), `version` (literal `1`). | Status: not_done
-- [ ] **Define ConversationTreeOptions interface** — Define options with optional `systemPrompt` (string), optional `systemMetadata` (`Record<string, unknown>`), optional `treeMeta` (`Record<string, unknown>`), optional `now` (`() => number`), optional `generateId` (`() => string`). | Status: not_done
+- [x] **Define ConversationTreeOptions interface** — Define options with optional `systemPrompt` (string), optional `systemMetadata` (`Record<string, unknown>`), optional `treeMeta` (`Record<string, unknown>`), optional `now` (`() => number`), optional `generateId` (`() => string`). | Status: done
 - [ ] **Define event types** — Define `ConversationTreeEvents` interface with event payloads: `message` (`{ node, parentId }`), `fork` (`{ forkPoint, label? }`), `switch` (`{ from, to }`), `prune` (`{ nodeId, nodesRemoved }`). Define `EventName` and `EventHandler<E>` types. | Status: not_done
 - [ ] **Define ConversationTree interface** — Define the full public API interface for `ConversationTree` including all methods: `addMessage`, `fork`, `switchTo`, `switchSibling`, `getActivePath`, `getPathTo`, `undo`, `redo`, `goToLeaf`, `getHead`, `getNode`, `getPaths`, `getTree`, `compare`, `prune`, `setLabel`, `clear`, `serialize`, `nodeCount` (readonly), `on`. | Status: not_done
 
 ### 1.2 Error Classes (`src/errors.ts`)
 
-- [ ] **Implement ConvoTreeError base class** — Create `ConvoTreeError` extending `Error` with a readonly `code` string property. Set the name to `'ConvoTreeError'`. | Status: not_done
-- [ ] **Implement NodeNotFoundError** — Create `NodeNotFoundError` extending `ConvoTreeError` with `code = 'NODE_NOT_FOUND'` and a readonly `nodeId` property. Constructor accepts `nodeId` and sets an appropriate error message like `"Node not found: {nodeId}"`. | Status: not_done
-- [ ] **Implement InvalidOperationError** — Create `InvalidOperationError` extending `ConvoTreeError` with `code = 'INVALID_OPERATION'`. Constructor accepts a message describing the invalid operation. | Status: not_done
+- [x] **Implement ConvoTreeError base class** — Create `ConvoTreeError` extending `Error` with a readonly `code` string property. Set the name to `'ConvoTreeError'`. | Status: done
+- [x] **Implement NodeNotFoundError** — Create `NodeNotFoundError` extending `ConvoTreeError` with `code = 'NODE_NOT_FOUND'` and a readonly `nodeId` property. Constructor accepts `nodeId` and sets an appropriate error message like `"Node not found: {nodeId}"`. | Status: done
+- [x] **Implement InvalidOperationError** — Create `InvalidOperationError` extending `ConvoTreeError` with `code = 'INVALID_OPERATION'`. Constructor accepts a message describing the invalid operation. | Status: done
 - [ ] **Implement VersionError** — Create `VersionError` extending `ConvoTreeError` with `code = 'VERSION_ERROR'` and a readonly `version` property. Constructor accepts the unsupported version number and sets an appropriate message. | Status: not_done
 
 ### 1.3 Node Operations (`src/node.ts`)
 
 - [ ] **Implement createNode factory function** — Create a function that accepts `role`, `content`, `parentId`, `metadata`, and configuration (`now`, `generateId`), and returns a fully initialized `ConversationNode` with a generated UUID, empty `children` array, `createdAt` set via the `now()` function, and metadata defaulting to `{}`. | Status: not_done
-- [ ] **Implement nodeToMessage mapping function** — Create a function that converts a `ConversationNode` to a `Message` object. Extract `metadata.toolCalls` into the `tool_calls` field, extract `metadata.toolCallId` into the `tool_call_id` field, extract `metadata.name` into the `name` field. Exclude all other metadata. Handle both string and `ContentPart[]` content. | Status: not_done
+- [x] **Implement nodeToMessage mapping function** — Create a function that converts a `ConversationNode` to a `Message` object. Extract `metadata.toolCalls` into the `tool_calls` field, extract `metadata.toolCallId` into the `tool_call_id` field, extract `metadata.name` into the `name` field. Exclude all other metadata. Handle both string and `ContentPart[]` content. | Status: done
 
 ### 1.4 Event Emitter (`src/events.ts`)
 
-- [ ] **Implement event emitter** — Create an event emitter class or factory that supports: `on(event, handler)` returning an unsubscribe function, and `emit(event, data)` to fire all registered handlers for that event. Handlers should be called synchronously in registration order. Support the four event types: `message`, `fork`, `switch`, `prune`. | Status: not_done
+- [x] **Implement event emitter** — Create an event emitter class or factory that supports: `on(event, handler)` returning an unsubscribe function, and `emit(event, data)` to fire all registered handlers for that event. Handlers should be called synchronously in registration order. Support the four event types: `message`, `fork`, `switch`, `prune`. | Status: done
 
 ### 1.5 Tree Core (`src/tree.ts`)
 
-- [ ] **Implement createConversationTree factory function** — Create the main factory function that accepts optional `ConversationTreeOptions`, initializes a `Map<string, ConversationNode>` for node storage, initializes `headId` (null or system prompt node ID), initializes `rootId`, initializes an empty `redoStack` array, and returns a `ConversationTree` instance. | Status: not_done
+- [x] **Implement createConversationTree factory function** — Create the main factory function that accepts optional `ConversationTreeOptions`, initializes a `Map<string, ConversationNode>` for node storage, initializes `headId` (null or system prompt node ID), initializes `rootId`, initializes an empty `redoStack` array, and returns a `ConversationTree` instance. | Status: done
 - [ ] **Implement configuration validation** — Validate options at creation time: `systemPrompt` (if provided) must be a non-empty string; `now` (if provided) must be a function; `generateId` (if provided) must be a function. Throw `ConvoTreeError` with descriptive messages for invalid values. | Status: not_done
-- [ ] **Implement system prompt initialization** — When `systemPrompt` is provided, create a root node with `role: 'system'`, the provided content, `systemMetadata` as metadata, and `parentId: null`. Set `headId` and `rootId` to this node's ID. | Status: not_done
-- [ ] **Implement addMessage()** — Create a new node as a child of HEAD. Add the new node's ID to HEAD's `children` array. Insert the new node into the map. Update `headId` to the new node. Clear the redo stack. Apply any pending branch label (set by `fork()`) to the new node's `branchLabel`. Emit `'message'` event. Return the new node. Handle the edge case where the tree is empty (no system prompt): the first `addMessage()` creates the root with `parentId: null`. | Status: not_done
-- [ ] **Implement getActivePath()** — Walk from HEAD to root via `parentId` pointers, collect all nodes, reverse to root-to-HEAD order, map each node to a `Message` using `nodeToMessage()`. Return empty array if the tree is empty. | Status: not_done
-- [ ] **Implement getHead()** — Return the current HEAD node from the map, or `null` if the tree is empty. | Status: not_done
-- [ ] **Implement getNode()** — Look up a node by ID in the map. Return the node or `undefined`. | Status: not_done
-- [ ] **Implement nodeCount property** — Return `map.size` as a readonly property. | Status: not_done
+- [x] **Implement system prompt initialization** — When `systemPrompt` is provided, create a root node with `role: 'system'`, the provided content, `systemMetadata` as metadata, and `parentId: null`. Set `headId` and `rootId` to this node's ID. | Status: done
+- [x] **Implement addMessage()** — Create a new node as a child of HEAD. Add the new node's ID to HEAD's `children` array. Insert the new node into the map. Update `headId` to the new node. Clear the redo stack. Apply any pending branch label (set by `fork()`) to the new node's `branchLabel`. Emit `'message'` event. Return the new node. Handle the edge case where the tree is empty (no system prompt): the first `addMessage()` creates the root with `parentId: null`. | Status: done
+- [x] **Implement getActivePath()** — Walk from HEAD to root via `parentId` pointers, collect all nodes, reverse to root-to-HEAD order, map each node to a `Message` using `nodeToMessage()`. Return empty array if the tree is empty. | Status: done
+- [x] **Implement getHead()** — Return the current HEAD node from the map, or `null` if the tree is empty. | Status: done
+- [x] **Implement getNode()** — Look up a node by ID in the map. Return the node or `undefined`. | Status: done
+- [x] **Implement nodeCount property** — Return `map.size` as a readonly property. | Status: done
 
 ### 1.6 Public API Exports (`src/index.ts`)
 
-- [ ] **Wire up index.ts exports** — Export `createConversationTree` from `tree.ts`, `deserialize` from `serialization.ts`, and all public types from `types.ts`. Export error classes from `errors.ts`. | Status: not_done
+- [x] **Wire up index.ts exports** — Export `createConversationTree` from `tree.ts`, `deserialize` from `serialization.ts`, and all public types from `types.ts`. Export error classes from `errors.ts`. | Status: done
 
 ### 1.7 Phase 1 Tests
 
@@ -75,22 +75,22 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ### 2.1 Fork Operations (`src/branch.ts` or `src/tree.ts`)
 
-- [ ] **Implement fork()** — Accept optional `nodeId` and optional `label`. If `nodeId` is provided, verify node exists (throw `NodeNotFoundError` if not). Set `headId` to the target node (or keep at current HEAD if `nodeId` omitted). Clear the redo stack. Store the `label` as a pending label to be applied to the next node added via `addMessage()`. Emit `'fork'` event with the fork point node and label. Return a `Branch` object with `forkPointId` and `label`. | Status: not_done
+- [x] **Implement fork()** — Accept optional `nodeId` and optional `label`. If `nodeId` is provided, verify node exists (throw `NodeNotFoundError` if not). Set `headId` to the target node (or keep at current HEAD if `nodeId` omitted). Clear the redo stack. Store the `label` as a pending label to be applied to the next node added via `addMessage()`. Emit `'fork'` event with the fork point node and label. Return a `Branch` object with `forkPointId` and `label`. | Status: done
 
 ### 2.2 Switch Operations (`src/navigation.ts` or `src/tree.ts`)
 
-- [ ] **Implement switchTo()** — Accept `nodeId`. Verify node exists (throw `NodeNotFoundError` if not). Set `headId` to the target node. Clear the redo stack. Emit `'switch'` event with the `from` (previous HEAD) and `to` (new HEAD) nodes. | Status: not_done
+- [x] **Implement switchTo()** — Accept `nodeId`. Verify node exists (throw `NodeNotFoundError` if not). Set `headId` to the target node. Clear the redo stack. Emit `'switch'` event with the `from` (previous HEAD) and `to` (new HEAD) nodes. | Status: done
 - [ ] **Implement switchSibling()** — Accept `direction` (`'next'` or `'prev'`). Get HEAD's parent node; if HEAD is root, return `null`. Find HEAD's index in the parent's `children` array. Compute the new index based on direction. If out of bounds, return `null`. Set `headId` to the sibling's ID. Clear the redo stack. Emit `'switch'` event. Return the new HEAD node. | Status: not_done
 
 ### 2.3 Undo/Redo (`src/navigation.ts` or `src/tree.ts`)
 
-- [ ] **Implement undo()** — If HEAD is the root (parentId is null), return `null`. Push current HEAD's ID onto the redo stack. Set `headId` to HEAD's parentId. Emit `'switch'` event. Return the new HEAD node. | Status: not_done
-- [ ] **Implement redo()** — If the redo stack is empty, return `null`. Pop the top node ID from the redo stack. Set `headId` to the popped ID. Emit `'switch'` event. Return the new HEAD node. | Status: not_done
+- [x] **Implement undo()** — If HEAD is the root (parentId is null), return `null`. Push current HEAD's ID onto the redo stack. Set `headId` to HEAD's parentId. Emit `'switch'` event. Return the new HEAD node. | Status: done
+- [x] **Implement redo()** — If the redo stack is empty, return `null`. Pop the top node ID from the redo stack. Set `headId` to the popped ID. Emit `'switch'` event. Return the new HEAD node. | Status: done
 
 ### 2.4 Additional Navigation
 
 - [ ] **Implement goToLeaf()** — Starting from HEAD, repeatedly follow the first child (index 0 of `children` array) until reaching a leaf node (empty children). Set `headId` to the leaf. Return the leaf node. Handle the case where HEAD is already a leaf. | Status: not_done
-- [ ] **Implement getPathTo()** — Accept `nodeId`. Verify node exists (throw `NodeNotFoundError` if not). Walk from the target node to the root via `parentId` pointers, collect nodes, reverse, map to `Message[]`. Do NOT change HEAD. | Status: not_done
+- [x] **Implement getPathTo()** — Accept `nodeId`. Verify node exists (throw `NodeNotFoundError` if not). Walk from the target node to the root via `parentId` pointers, collect nodes, reverse, map to `Message[]`. Do NOT change HEAD. | Status: done
 
 ### 2.5 Redo Stack Clearing
 
@@ -113,7 +113,7 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ### 3.1 Prune (`src/branch.ts` or `src/tree.ts`)
 
-- [ ] **Implement prune()** — Accept `nodeId`. Verify node exists (throw `NodeNotFoundError` if not). Throw `InvalidOperationError` if the node is the root. Collect all descendant node IDs via DFS traversal. Remove the node's ID from its parent's `children` array. Delete all collected nodes (including the target node) from the map. If HEAD was within the pruned subtree, move HEAD to the pruned node's parent. Emit `'prune'` event with `nodeId` and `nodesRemoved` count. Return the count of removed nodes. | Status: not_done
+- [x] **Implement prune()** — Accept `nodeId`. Verify node exists (throw `NodeNotFoundError` if not). Throw `InvalidOperationError` if the node is the root. Collect all descendant node IDs via DFS traversal. Remove the node's ID from its parent's `children` array. Delete all collected nodes (including the target node) from the map. If HEAD was within the pruned subtree, move HEAD to the pruned node's parent. Emit `'prune'` event with `nodeId` and `nodesRemoved` count. Return the count of removed nodes. | Status: done
 
 ### 3.2 Compare (`src/branch.ts` or `src/tree.ts`)
 
@@ -126,8 +126,8 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ### 3.4 Label and Clear Operations
 
-- [ ] **Implement setLabel()** — Accept `nodeId` and `label`. Verify node exists (throw `NodeNotFoundError` if not). Set the node's `branchLabel` property to the provided label. | Status: not_done
-- [ ] **Implement clear()** — Remove all nodes from the map. Reset `headId`, `rootId`, and `redoStack`. If a system prompt was provided at creation time, re-create the root system node (same as initialization). | Status: not_done
+- [x] **Implement setLabel()** — Accept `nodeId` and `label`. Verify node exists (throw `NodeNotFoundError` if not). Set the node's `branchLabel` property to the provided label. | Status: done
+- [x] **Implement clear()** — Remove all nodes from the map. Reset `headId`, `rootId`, and `redoStack`. If a system prompt was provided at creation time, re-create the root system node (same as initialization). | Status: done
 
 ### 3.5 Phase 3 Tests
 
@@ -142,7 +142,7 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ### 4.1 Serialize (`src/serialization.ts`)
 
-- [ ] **Implement serialize()** — Export the full tree state as a `TreeState` object: convert the `Map` to a `Record<string, ConversationNode>`, include `rootId`, `headId`, `redoStack`, `pendingLabel` (if any), `treeMeta`, and `version: 1`. The result must be JSON-serializable (no `Map`, no `Set`, no circular references). | Status: not_done
+- [x] **Implement serialize()** — Export the full tree state as a `TreeState` object: convert the `Map` to a `Record<string, ConversationNode>`, include `rootId`, `headId`, `redoStack`, `pendingLabel` (if any), `treeMeta`, and `version: 1`. The result must be JSON-serializable (no `Map`, no `Set`, no circular references). | Status: done
 
 ### 4.2 Deserialize (`src/serialization.ts`)
 
@@ -181,7 +181,7 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ## Phase 7: Documentation
 
-- [ ] **Write README.md** — Create a comprehensive README including: package description, installation instructions (`npm install convo-tree`), quick start example, API reference for all public methods, branching tutorial with diagrams (ASCII tree representations), visualization examples (getTree, getPaths), integration guides (sliding-context, convo-compress, agent-scratchpad, ai-diff), configuration options table, error handling documentation, and performance characteristics. | Status: not_done
+- [x] **Write README.md** — Create a comprehensive README including: package description, installation instructions (`npm install convo-tree`), quick start example, API reference for all public methods, branching tutorial with diagrams (ASCII tree representations), visualization examples (getTree, getPaths), integration guides (sliding-context, convo-compress, agent-scratchpad, ai-diff), configuration options table, error handling documentation, and performance characteristics. | Status: done
 - [ ] **Add JSDoc comments to all public API methods** — Ensure every method on the `ConversationTree` interface and every public function (`createConversationTree`, `deserialize`) has complete JSDoc comments matching the spec's descriptions, including `@param`, `@returns`, and `@throws` tags. | Status: not_done
 - [ ] **Add inline code comments for complex algorithms** — Add explanatory comments to the prune DFS traversal, the compare common-prefix algorithm, the getTree recursive construction, and the active path extraction walk. | Status: not_done
 
@@ -189,9 +189,9 @@ This document breaks down all work required to implement the `convo-tree` packag
 
 ## Phase 8: Build, Lint, and Publish Preparation
 
-- [ ] **Verify TypeScript build** — Run `npm run build` and confirm the `dist/` directory contains `index.js`, `index.d.ts`, and source maps. Verify that the declaration files export all public types correctly. | Status: not_done
-- [ ] **Configure and pass ESLint** — Ensure ESLint is configured and `npm run lint` passes with no errors or warnings on all source files. | Status: not_done
+- [x] **Verify TypeScript build** — Run `npm run build` and confirm the `dist/` directory contains `index.js`, `index.d.ts`, and source maps. Verify that the declaration files export all public types correctly. | Status: done
+- [x] **Configure and pass ESLint** — Ensure ESLint is configured and `npm run lint` passes with no errors or warnings on all source files. | Status: done
 - [ ] **Verify all tests pass** — Run `npm run test` and confirm all tests pass. Verify test coverage covers all public methods, all error paths, and all edge cases described in the spec. | Status: not_done
 - [ ] **Verify package.json fields** — Confirm `name`, `version`, `description`, `main`, `types`, `files`, `engines`, `license`, `keywords`, and `publishConfig` are correct. Add relevant keywords (e.g., `conversation`, `tree`, `branching`, `chat`, `llm`, `fork`). | Status: not_done
-- [ ] **Bump version to target release** — Update `package.json` version according to the implementation phase (0.1.0 for Phase 1, through 1.0.0 for production-ready release). | Status: not_done
+- [x] **Bump version to target release** — Update `package.json` version according to the implementation phase (0.1.0 for Phase 1, through 1.0.0 for production-ready release). | Status: done
 - [ ] **Dry-run npm publish** — Run `npm publish --dry-run` to verify the package contents, file list, and size are correct. Ensure no source files, test files, or unnecessary files are included in the published package. | Status: not_done
