@@ -3,6 +3,7 @@
 Tree-structured conversation state manager for branching chats.
 
 [![npm version](https://img.shields.io/npm/v/convo-tree.svg)](https://www.npmjs.com/package/convo-tree)
+[![npm downloads](https://img.shields.io/npm/dt/convo-tree.svg)](https://www.npmjs.com/package/convo-tree)
 [![license](https://img.shields.io/npm/l/convo-tree.svg)](https://github.com/SiluPanda/convo-tree/blob/master/LICENSE)
 [![node](https://img.shields.io/node/v/convo-tree.svg)](https://www.npmjs.com/package/convo-tree)
 
