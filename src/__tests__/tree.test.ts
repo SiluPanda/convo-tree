@@ -399,6 +399,94 @@ describe('createConversationTree', () => {
     })
   })
 
+  describe('metadata cannot overwrite role/content', () => {
+    it('role and content are authoritative over metadata fields', () => {
+      const tree = createConversationTree()
+      tree.addMessage('user', 'Real content', { role: 'hacked', content: 'injected' })
+      const path = tree.getActivePath()
+      expect(path[0].role).toBe('user')
+      expect(path[0].content).toBe('Real content')
+    })
+  })
+
+  describe('serialize deep clone', () => {
+    it('serialized state is not affected by subsequent mutations', () => {
+      const tree = createConversationTree()
+      const n1 = tree.addMessage('user', 'Hello')
+      const state = tree.serialize()
+
+      // Mutate tree after serializing
+      tree.addMessage('assistant', 'World')
+
+      // Serialized state should still show only 1 child-less node
+      expect(Object.keys(state.nodes)).toHaveLength(1)
+      expect(state.nodes[n1.id].children).toHaveLength(0)
+    })
+  })
+
+  describe('switchTo clears redo stack', () => {
+    it('redo returns null after switchTo', () => {
+      const tree = createConversationTree()
+      tree.addMessage('user', 'First')
+      const n2 = tree.addMessage('assistant', 'Second')
+      tree.addMessage('user', 'Third')
+      tree.undo() // redo stack has Third
+
+      tree.switchTo(n2.id)
+      expect(tree.redo()).toBeNull()
+    })
+  })
+
+  describe('event handler errors', () => {
+    it('throwing handler does not crash addMessage', () => {
+      const tree = createConversationTree()
+      tree.on('message', () => { throw new Error('boom') })
+      expect(() => tree.addMessage('user', 'Hello')).not.toThrow()
+      expect(tree.nodeCount).toBe(1)
+    })
+
+    it('throwing handler does not prevent other handlers', () => {
+      const tree = createConversationTree()
+      const secondHandler = vi.fn()
+      tree.on('message', () => { throw new Error('boom') })
+      tree.on('message', secondHandler)
+      tree.addMessage('user', 'Hello')
+      expect(secondHandler).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('error class names', () => {
+    it('NodeNotFoundError has correct name', () => {
+      expect(new NodeNotFoundError('x').name).toBe('NodeNotFoundError')
+    })
+
+    it('InvalidOperationError has correct name', () => {
+      expect(new InvalidOperationError('x').name).toBe('InvalidOperationError')
+    })
+  })
+
+  describe('prune clears redo entries for pruned nodes', () => {
+    it('redo returns null after pruning redo target', () => {
+      const tree = createConversationTree()
+      tree.addMessage('user', 'First')
+      tree.addMessage('assistant', 'Second')
+      const n3 = tree.addMessage('user', 'Third')
+
+      tree.undo() // redo stack has Third
+      tree.undo() // redo stack has [Third, Second]
+
+      // Prune Third (which is in the redo stack)
+      tree.prune(n3.id)
+
+      // Redo should still work for Second (not pruned)
+      const result = tree.redo()
+      expect(result).not.toBeNull()
+
+      // But redo again should return null (Third was pruned)
+      expect(tree.redo()).toBeNull()
+    })
+  })
+
   describe('systemPrompt option', () => {
     it('creates a system node automatically', () => {
       const tree = createConversationTree({ systemPrompt: 'You are helpful' })
