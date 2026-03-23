@@ -23,8 +23,8 @@ export function createConversationTree(
   function emit(event: string, payload?: unknown): void {
     const handlers = listeners.get(event)
     if (handlers) {
-      for (const handler of handlers) {
-        handler(payload)
+      for (const handler of [...handlers]) {
+        try { handler(payload) } catch { /* swallow handler errors */ }
       }
     }
   }
@@ -47,7 +47,7 @@ export function createConversationTree(
 
   function nodeToMessage(node: ConversationNode): Message {
     const { role, content, metadata } = node
-    return { role, content, ...metadata }
+    return { ...metadata, role, content }
   }
 
   const tree: ConversationTree = {
@@ -97,6 +97,7 @@ export function createConversationTree(
     switchTo(nodeId: string): void {
       requireNode(nodeId)
       headId = nodeId
+      redoStack.length = 0
       emit('switch', nodeId)
     },
 
@@ -149,22 +150,23 @@ export function createConversationTree(
     prune(nodeId: string): number {
       const node = requireNode(nodeId)
 
-      // Collect all descendants via BFS
-      const toDelete: string[] = []
-      const queue: string[] = [nodeId]
-      while (queue.length > 0) {
-        const current = queue.shift()!
-        toDelete.push(current)
+      // Collect all descendants via BFS (index pointer avoids O(n^2) shift)
+      const toDelete: string[] = [nodeId]
+      let idx = 0
+      while (idx < toDelete.length) {
+        const current = toDelete[idx++]
         const n = nodes.get(current)
         if (n) {
           for (const childId of n.children) {
-            queue.push(childId)
+            toDelete.push(childId)
           }
         }
       }
 
+      const deleteSet = new Set(toDelete)
+
       // If head is in the subtree being deleted, move head to pruned node's parent
-      if (headId && toDelete.includes(headId)) {
+      if (headId && deleteSet.has(headId)) {
         headId = node.parentId
       }
 
@@ -181,7 +183,6 @@ export function createConversationTree(
       }
 
       // Clear redo stack entries that point to deleted nodes
-      const deleteSet = new Set(toDelete)
       for (let i = redoStack.length - 1; i >= 0; i--) {
         if (deleteSet.has(redoStack[i])) {
           redoStack.splice(i, 1)
@@ -209,8 +210,12 @@ export function createConversationTree(
     },
 
     serialize(): TreeState {
+      const clonedNodes: Record<string, ConversationNode> = {}
+      for (const [id, node] of nodes) {
+        clonedNodes[id] = { ...node, children: [...node.children], metadata: { ...node.metadata } }
+      }
       return {
-        nodes: Object.fromEntries(nodes),
+        nodes: clonedNodes,
         rootId,
         headId,
         redoStack: [...redoStack],
